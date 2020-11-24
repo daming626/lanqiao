@@ -17,92 +17,114 @@ public class AI extends MIDlet
 	public void pauseApp(){
 	}
 }
-class MainCanvas extends Canvas
+class MainCanvas extends Canvas implements Runnable
 {
-	int x,y,i;
-	Image currentImg,downImg,downImg1,downImg2,leftImg,leftImg1,leftUpImg,
-		leftImg2,rightImg,rightImg1,rightImg2,upImg,upImg1,upImg2;
-	
+	Thread thread;
+	int heroX,heroY,bossX,bossY,flag;
+	Image currentImg,bossImg;
+	Image heroImg[][]=new Image[4][3];
+	/*4个方向，每个方向四张图片，0表示left，1表示right，2表示up，3表示down*/
 	public MainCanvas()
 	{
 		try
 		{
-			downImg=Image.createImage("/sayo10.png");		/* 录入图片 */
-			downImg1=Image.createImage("/sayo20.png");
-			downImg2=Image.createImage("/sayo00.png");
-			leftImg=Image.createImage("/sayo12.png");
-			leftImg1=Image.createImage("/sayo22.png");
-			leftImg2=Image.createImage("/sayo02.png");
-			upImg=Image.createImage("/sayo14.png");
-			upImg1=Image.createImage("/sayo04.png");
-			upImg2=Image.createImage("/sayo24.png");
-			rightImg=Image.createImage("/sayo16.png");
-			rightImg1=Image.createImage("/sayo26.png");
-			rightImg2=Image.createImage("/sayo06.png");
-			leftUpImg=Image.createImage("/sayo15.png");
-			currentImg=downImg;
-			x=110;
-			y=200;
-			i=0;
+			for(int i=0;i<heroImg.length;i++)
+			{
+				for(int j=0;j<heroImg[i].length;j++)
+					heroImg[i][j]=Image.createImage("/sayo"+i+j+".png");
+			}
+			bossImg=Image.createImage("/b0.png");
+			currentImg=heroImg[3][1];
+
+			heroX=110;
+			heroY=200;
+
+			bossX=0;
+			bossY=0;
+
+			flag=0;
+
+			thread=new Thread(this);
+			thread.start();
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
 	}
-	public void paint(Graphics g)					
+	public void run() /*多线程，死循环实现boss追hero*/
 	{
-		g.setColor(0,128,255);						 /*背景颜色*/
-		g.fillRect(0,0,getWidth(),getHeight());		
-		g.drawImage(currentImg,x,y,0);			 /*读取图片*/
+		while(true){
+		try{
+			Thread.sleep(200);			
+		}
+		catch (InterruptedException e){
+			e.printStackTrace();
+		}
+		if(bossX<heroX){
+			bossX=bossX+2;
+		}
+			else{
+				bossX=bossX-2;
+			}
+		if(bossY<heroY){
+			bossY=bossY+2;
+		}
+		else{
+			bossY=bossY-2;
+		}
+		repaint();
+
+		}
 	}
-	public void keyPressed(int keyCode)				 /*键盘输入指令*/
+	public void paint(Graphics g)
+	{
+		g.setColor(0,128,255);						 
+		g.fillRect(0,0,getWidth(),getHeight());		
+		g.drawImage(currentImg,heroX,heroY,0);	
+		g.drawImage(bossImg,bossX,bossY,0);
+	}
+	public void changePicAndMove(int diret) /*自定义方法，实现hero图片更新与移动*/
+	{
+		if (flag==0){
+			currentImg=heroImg[diret][0];
+			flag++;
+		}
+		else if (flag==1){
+		currentImg=heroImg[diret][2];
+		flag=0;
+		}
+	}
+	public void keyPressed(int keyCode)   /*键盘输入指令*/
 	{
 		int action=getGameAction(keyCode);
-		if (action==LEFT)							/*  向左走  */
-		{
-			if (i==0){currentImg=leftImg;}
-			if (i==1){currentImg=leftImg1;}
-			if (i==2){currentImg=leftImg2;}
-			x=x-5;
-			i=i+1;
-			
+		if (action==LEFT){
+			changePic(0);
+			heroX=heroX-5;
 		}												
-		if (action==RIGHT)							/*  向右走  */
-		{
-			if (i==0){currentImg=rightImg;}
-			if (i==1){currentImg=rightImg1;}
-			if (i==2){currentImg=rightImg2;}
-			x=x+5;
-			i=i+1;
+		if (action==RIGHT){
+			changePic(1);
+			heroX=heroX+5;
 		}
-		if (action==UP)								/*  向上走  */
-		{		
-			if (i==0){currentImg=upImg;}
-			if (i==1){currentImg=upImg1;}
-			if (i==2){currentImg=upImg2;}
-			y=y-5;
-			i=i+1;
+		if (action==UP){		
+			changePic(2);
+			heroY=heroY-5;
 		}
-		if (action==DOWN)							/*  向下走  */
-		{
-			if (i==0){currentImg=downImg;}
-			if (i==1){currentImg=downImg1;}
-			if (i==2){currentImg=downImg2;}
-			y=y+5;
-			i=i+1;
+		if (action==DOWN){
+			changePic(3);
+			heroY=heroY+5;
 		}
-		if (action==UP-RIGHT)
-		{
-			currentImg=leftUpImg;
-			x=x+5;
-			y=y-5;
-		}
-		if (i>2){i=0;}				/* 重置i */
-		if (x<0){x=0;}				/* 限制宽度 */
-		if (x>220){x=220;}			/* 限制宽度 */
-		if (y<0){y=0;}				/* 限制高度 */
-		if (y>260){y=260;}			/* 限制高度 */
-		repaint();
+		if (heroX<0){heroX=0;}				/*限制hero活动范围*/
+		if (heroX>220){heroX=220;}			
+		if (heroY<0){heroY=0;}				
+		if (heroY>260){heroY=260;}		
 	}
 }
+		/*if (action==LEFT){
+			if (leftFlag==0){
+				currentImg=heroImg[0][0];leftFlag++;
+			}
+			else if (leftFlag==1){
+				currentImg=heroImg[0][2];leftFlag=0;
+			}
+		}*/

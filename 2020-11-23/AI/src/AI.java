@@ -17,75 +17,107 @@ public class AI extends MIDlet
 	public void pauseApp(){
 	}
 }
-class MainCanvas extends Canvas
+class MainCanvas extends Canvas implements Runnable
 {
-	int x,y,flag;
-	Image currentImg;
+	Thread thread;
+	int heroX,heroY,bossX,bossY,flag;
+	Image currentImg,bossImg;
 	Image heroImg[][]=new Image[4][3];
-	/*0向左，1向右，2向上，3向下*/
+	/*4个方向，每个方向四张图片，0表示left，1表示right，2表示up，3表示down*/
 	public MainCanvas()
 	{
 		try
 		{
-			for(int i=0;i<heroImg.length;i++){
+			for(int i=0;i<heroImg.length;i++)
+			{
 				for(int j=0;j<heroImg[i].length;j++)
 					heroImg[i][j]=Image.createImage("/sayo"+i+j+".png");
 			}
+			bossImg=Image.createImage("/b0.png");
 			currentImg=heroImg[3][1];
 
-			x=110;
-			y=200;
+			heroX=110;
+			heroY=200;
+
+			bossX=0;
+			bossY=0;
+
 			flag=0;
+
+			thread=new Thread(this);
+			thread.start();
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
 	}
-	public void paint(Graphics g)					
+	public void run() /*多线程，死循环实现boss追hero*/
+	{
+		while(true){
+		try{
+			Thread.sleep(200);			
+		}
+		catch (InterruptedException e){
+			e.printStackTrace();
+		}
+		if(bossX<heroX){
+			bossX=bossX+2;
+		}
+			else{
+				bossX=bossX-2;
+			}
+		if(bossY<heroY){
+			bossY=bossY+2;
+		}
+		else{
+			bossY=bossY-2;
+		}
+		repaint();
+
+		}
+	}
+	public void paint(Graphics g)
 	{
 		g.setColor(0,128,255);						 
 		g.fillRect(0,0,getWidth(),getHeight());		
-		g.drawImage(currentImg,x,y,0);			 
+		g.drawImage(currentImg,heroX,heroY,0);	
+		g.drawImage(bossImg,bossX,bossY,0);
 	}
-	public void changePic(int diret){
+	public void changePicAndMove(int diret) /*自定义方法，实现hero图片更新与移动*/
+	{
 		if (flag==0){
-				currentImg=heroImg[diret][0];
-				flag++;
-			}
-		else if (flag==1){
-			currentImg=heroImg[diret][2];
-			flag=0;
+			currentImg=heroImg[diret][0];
+			flag++;
 		}
-		repaint();
+		else if (flag==1){
+		currentImg=heroImg[diret][2];
+		flag=0;
+		}
 	}
-	public void keyPressed(int keyCode)				 
+	public void keyPressed(int keyCode)   /*键盘输入指令*/
 	{
 		int action=getGameAction(keyCode);
-		if (action==LEFT)							
-		{
-			changePic(0);
-			x=x-5;
+		if (action==LEFT){
+			changePicAndMove(0);
+			heroX=heroX-5;
 		}												
-		if (action==RIGHT)							
-		{
-			changePic(1);
-			x=x+5;
+		if (action==RIGHT){
+			changePicAndMove(1);
+			heroX=heroX+5;
 		}
-		if (action==UP)								
-		{		
-			changePic(2);
-			y=y-5;
+		if (action==UP){		
+			changePicAndMove(2);
+			heroY=heroY-5;
 		}
-		if (action==DOWN)							
-		{
-			changePic(3);
-			y=y+5;
+		if (action==DOWN){
+			changePicAndMove(3);
+			heroY=heroY+5;
 		}
-		if (x<0){x=0;}				
-		if (x>220){x=220;}			
-		if (y<0){y=0;}				
-		if (y>260){y=260;}			
+		if (heroX<0){heroX=0;}				/*限制hero活动范围*/
+		if (heroX>220){heroX=220;}			
+		if (heroY<0){heroY=0;}				
+		if (heroY>260){heroY=260;}		
 	}
 }
 		/*if (action==LEFT){
