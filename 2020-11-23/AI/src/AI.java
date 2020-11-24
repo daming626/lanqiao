@@ -1,6 +1,7 @@
 import javax.microedition.lcdui.*;
 import javax.microedition.midlet.*;
 import java.io.*;
+import java.util.*;
 public class AI extends MIDlet
 {
 	Display display;
@@ -17,10 +18,12 @@ public class AI extends MIDlet
 	public void pauseApp(){
 	}
 }
+
 class MainCanvas extends Canvas implements Runnable
 {
 	Thread thread;
 	int heroX,heroY,bossX,bossY,flag;
+	Random rd=new Random();
 	Image currentImg,bossImg;
 	Image heroImg[][]=new Image[4][3];
 	/*4个方向，每个方向四张图片，0表示left，1表示right，2表示up，3表示down*/
@@ -54,9 +57,10 @@ class MainCanvas extends Canvas implements Runnable
 	}
 	public void run() /*多线程，死循环实现boss追hero*/
 	{
+		int rdNumber=rd.nextInt(10);
 		while(true){
 		try{
-			Thread.sleep(200);			
+			Thread.sleep(200);		/*FPS：屏幕刷新率*/	
 		}
 		catch (InterruptedException e){
 			e.printStackTrace();

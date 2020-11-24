@@ -99,19 +99,19 @@ class MainCanvas extends Canvas implements Runnable
 	{
 		int action=getGameAction(keyCode);
 		if (action==LEFT){
-			changePic(0);
+			changePicAndMove(0);
 			heroX=heroX-5;
 		}												
 		if (action==RIGHT){
-			changePic(1);
+			changePicAndMove(1);
 			heroX=heroX+5;
 		}
 		if (action==UP){		
-			changePic(2);
+			changePicAndMove(2);
 			heroY=heroY-5;
 		}
 		if (action==DOWN){
-			changePic(3);
+			changePicAndMove(3);
 			heroY=heroY+5;
 		}
 		if (heroX<0){heroX=0;}				/*限制hero活动范围*/
